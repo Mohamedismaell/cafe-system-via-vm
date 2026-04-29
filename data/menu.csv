@@ -1,0 +1,36 @@
+item_name,price,category,quantity
+Espresso,15.0,Coffee,50
+Cappuccino,22.0,Coffee,45
+Latte,25.0,Coffee,40
+Americano,18.0,Coffee,50
+Flat White,24.0,Coffee,35
+Macchiato,20.0,Coffee,40
+Mocha,27.0,Coffee,0
+Turkish Coffee,18.0,Coffee,45
+Iced Coffee,22.0,Coffee,40
+Croissant,15.0,Pastry,30
+Sandwich,25.0,Food,20
+Cheesecake,30.0,Dessert,15
+Tea,10.0,Beverage,60
+Hot Chocolate,18.0,Beverage,40
+Cold Brew,28.0,Beverage,20
+Classic Tea,10.0,Beverage,20
+Green Tea,12.0,Beverage,20
+Chamomile Tea,14.0,Beverage,20
+Mint Tea,12.0,Beverage,8
+Chai Latte,22.0,Beverage,20
+Hot Chocolate,20.0,Beverage,20
+Iced Chocolate,22.0,Beverage,20
+Strawberry Smoothie,30.0,Beverage,20
+Mango Smoothie,30.0,Beverage,20
+Fresh Orange Juice,25.0,Beverage,20
+Croissant Plain,18.0,Pastry,20
+Croissant Chocolate,22.0,Pastry,20
+Croissant Almond,24.0,Pastry,20
+Cheese Sandwich,28.0,Food,20
+Chicken Sandwich,35.0,Food,20
+Tuna Sandwich,32.0,Food,20
+Club Sandwich,40.0,Food,20
+Egg Sandwich,25.0,Food,20
+Cheesecake Slice,35.0,Dessert,20
+Chocolate Brownie,28.0,Dessert,20
