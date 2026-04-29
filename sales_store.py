@@ -1,6 +1,3 @@
-"""
-sales_store.py — persistence layer for completed sales (sales.csv).
-"""
 import csv
 import os
 from datetime import datetime
@@ -21,7 +18,7 @@ def ensure_sales_file():
             csv.writer(fh).writerow(SALES_HEADERS)
 
 
-def append_sale(order, payment_now):
+def append_sale(order):
     ensure_sales_file()
     now           = datetime.now()
     item_snapshot = " | ".join(

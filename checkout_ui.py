@@ -1,6 +1,4 @@
-"""
-checkout_ui.py — CheckoutApp UI class for the Corner Cafe checkout screen.
-"""
+
 import tkinter as tk
 from tkinter import messagebox
 
@@ -39,7 +37,7 @@ class CheckoutApp:
         self._render_orders()
         self._update_summary()
 
-    # ── small widget builders ───────────────────────────────────────────────
+    # widget builders 
 
     def _make_order_list(self, parent, select_bg):
         """Scrollable Listbox inside *parent*; returns the Listbox."""
@@ -67,7 +65,7 @@ class CheckoutApp:
         inner.pack(fill="both", expand=True, padx=8, pady=8)
         return inner
 
-    # ── UI build ────────────────────────────────────────────────────────────
+    #  UI build 
 
     def _build_ui(self):
         build_header(self.root, "CORNER CAFE - Checkout")
@@ -155,7 +153,7 @@ class CheckoutApp:
         self.clear_btn   = make_button(actions, "Clear Selected Order", BROWNIE, self._clear_order, hover=DANGER, pady=8)
         self.clear_btn.pack(fill="x")
 
-    # ── order list rendering ────────────────────────────────────────────────
+    #  load orders 
 
     def _reload_orders(self):
         self.orders = load_pending_orders()
@@ -245,7 +243,7 @@ class CheckoutApp:
             tk.Label(card, text=f"Qty: {item['quantity']}  |  Line Total: {item['quantity'] * item['price']:.2f} EGP",
                      font=FONT_BODY, bg=WHITE, fg=BROWNIE).pack(anchor="w", pady=(8, 0))
 
-    # ── payment logic ───────────────────────────────────────────────────────
+    #  payment  
 
     def _parse_cash(self):
         raw = self.cash_var.get().strip()
