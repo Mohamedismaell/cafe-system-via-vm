@@ -1,0 +1,10 @@
+order_id,created_at,items_json,total_amount,amount_paid,balance_due,status,sale_recorded
+ORD20260429194032,2026-04-29 19:40:32,"[{""name"": ""Cappuccino"", ""quantity"": 5, ""price"": 60.0}, {""name"": ""Espresso"", ""quantity"": 3, ""price"": 45.0}]",435.00,595.00,0.00,Paid,yes
+ORD20260429194133,2026-04-29 19:41:33,"[{""name"": ""Espresso"", ""quantity"": 5, ""price"": 45.0}, {""name"": ""Latte"", ""quantity"": 9, ""price"": 65.0}, {""name"": ""Iced Mocha"", ""quantity"": 6, ""price"": 75.0}]",1260.00,1260.00,0.00,Paid,yes
+ORD20260429195419,2026-04-29 19:54:19,"[{""name"": ""Espresso"", ""quantity"": 4, ""price"": 45.0}]",180.00,180.00,0.00,Paid,yes
+ORD20260429195529,2026-04-29 19:55:29,"[{""name"": ""Espresso"", ""quantity"": 5, ""price"": 45.0}]",225.00,225.00,0.00,Paid,yes
+ORD20260429195606,2026-04-29 19:56:06,"[{""name"": ""Espresso"", ""quantity"": 2, ""price"": 45.0}, {""name"": ""Latte"", ""quantity"": 2, ""price"": 65.0}, {""name"": ""Cappuccino"", ""quantity"": 1, ""price"": 60.0}, {""name"": ""Cheesecake"", ""quantity"": 1, ""price"": 80.0}]",360.00,360.00,0.00,Paid,yes
+ORD20260429195939,2026-04-29 19:59:39,"[{""name"": ""Espresso"", ""quantity"": 2, ""price"": 45.0}, {""name"": ""Cappuccino"", ""quantity"": 3, ""price"": 60.0}, {""name"": ""Iced Mocha"", ""quantity"": 2, ""price"": 75.0}]",420.00,420.00,0.00,Paid,yes
+ORD20260429195942,2026-04-29 19:59:42,"[{""name"": ""Latte"", ""quantity"": 1, ""price"": 65.0}, {""name"": ""Cappuccino"", ""quantity"": 1, ""price"": 60.0}]",125.00,125.00,0.00,Paid,yes
+ORD20260429211251,2026-04-29 21:12:51,"[{""name"": ""Espresso"", ""quantity"": 3, ""price"": 45.0}, {""name"": ""Croissant"", ""quantity"": 1, ""price"": 35.0}, {""name"": ""Iced Mocha"", ""quantity"": 1, ""price"": 75.0}, {""name"": ""Latte"", ""quantity"": 1, ""price"": 65.0}]",310.00,310.00,0.00,Paid,yes
+ORD20260429215628,2026-04-29 21:56:28,"[{""name"": ""Espresso"", ""quantity"": 2, ""price"": 45.0}, {""name"": ""Cappuccino"", ""quantity"": 3, ""price"": 60.0}]",270.00,270.00,0.00,Paid,yes
