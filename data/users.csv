@@ -1,0 +1,8 @@
+user_id,full_name,username,password,role,phone,email
+1,mohamed ismael,mohamedismael,a1234,admin,01000000001,admin@cornercafe.local
+2,zeina ahmed,zeinaahmed,b1234,manager,01000000002,manager1@cornercafe.local
+3,saif abo Seada,saifaboseada,c1234,manager,01000000003,manager2@cornercafe.local
+4,shahd amgad,shahdamgad,d1234,staff,01000000004,staff1@cornercafe.local
+5,safaa,safaa,e1234,staff,01000000005,staff2@cornercafe.local
+6,ahmed abd el rahman,ahmedabdelrahman,f1234,staff,01000000006,staff3@cornercafe.local
+7,shada,shada,g1234,staff,01000000007,staff4@cornercafe.local

@@ -1,0 +1,7 @@
+item_name,price,category,quantity
+Espresso,45.0,Coffee,30
+Cappuccino,60.0,Coffee,24
+Latte,65.0,Coffee,20
+Iced Mocha,75.0,Cold Drinks,18
+Croissant,35.0,Bakery,25
+Cheesecake,80.0,Desserts,12
