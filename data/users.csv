@@ -1,0 +1,4 @@
+username,password,role
+admin,1234,admin
+staff1,abcd,staff
+barista1,pass1,staff
