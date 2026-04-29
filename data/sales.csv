@@ -1,0 +1,13 @@
+sale_id,date,time,items,total_amount,cash_received,change_given,payment_method
+SALE20260429183845,2026-04-29,18:38:45,Cappuccino x1 @ 60.00 | Espresso x1 @ 45.00 | Latte x1 @ 65.00 | Iced Mocha x1 @ 75.00 | Croissant x1 @ 35.00 | Cheesecake x1 @ 80.00,360.00,360.00,0.00,Cash
+SALE20260429191326,2026-04-29,19:13:26,Cappuccino x3 @ 60.00 | Latte x2 @ 65.00 | Iced Mocha x2 @ 75.00 | Croissant x4 @ 35.00,600.00,600.00,0.00,Cash
+SALE20260429193205,2026-04-29,19:32:05,Iced Mocha x9 @ 75.00,675.00,20.00,-655.00,Cash - Debt
+ORD20260429194133,2026-04-29,19:41:48,Espresso x5 @ 45.00 | Latte x9 @ 65.00 | Iced Mocha x6 @ 75.00,1260.00,1260.00,0.00,Cash
+ORD20260429195419,2026-04-29,19:55:39,Espresso x4 @ 45.00,180.00,180.00,0.00,Cash
+ORD20260429194032,2026-04-29,19:55:54,Cappuccino x5 @ 60.00 | Espresso x3 @ 45.00,435.00,595.00,160.00,Cash
+ORD20260429195529,2026-04-29,19:55:59,Espresso x5 @ 45.00,225.00,225.00,0.00,Cash
+ORD20260429195606,2026-04-29,20:00:33,Espresso x2 @ 45.00 | Latte x2 @ 65.00 | Cappuccino x1 @ 60.00 | Cheesecake x1 @ 80.00,360.00,360.00,0.00,Cash
+ORD20260429195939,2026-04-29,21:13:30,Espresso x2 @ 45.00 | Cappuccino x3 @ 60.00 | Iced Mocha x2 @ 75.00,420.00,420.00,0.00,Cash
+ORD20260429195942,2026-04-29,21:13:55,Latte x1 @ 65.00 | Cappuccino x1 @ 60.00,125.00,125.00,0.00,Cash
+ORD20260429215628,2026-04-29,21:56:49,Espresso x2 @ 45.00 | Cappuccino x3 @ 60.00,270.00,270.00,0.00,Cash
+ORD20260429211251,2026-04-29,21:57:05,Espresso x3 @ 45.00 | Croissant x1 @ 35.00 | Iced Mocha x1 @ 75.00 | Latte x1 @ 65.00,310.00,310.00,0.00,Cash
