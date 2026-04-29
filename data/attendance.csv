@@ -1,0 +1,13 @@
+staff_name,date,clock_in,clock_out,worked_hours,status
+Ahmed,2026-04-29,18:39:01,,,Open
+Sara,2026-04-29,18:39:08,,,Open
+Omar,2026-04-29,19:24:07,,,Open
+mohamed ismael,2026-04-29,19:45:18,19:45:20,0.00,Closed
+mohamed ismael,2026-04-29,19:45:26,19:45:31,0.00,Closed
+zeina ahmed,2026-04-29,19:45:34,19:45:36,0.00,Closed
+saif abo Seada,2026-04-29,19:57:29,19:57:32,0.00,Closed
+mohamed ismael,2026-04-29,20:00:39,20:00:46,0.00,Closed
+shada,2026-04-29,20:01:14,20:01:14,0.00,Closed
+mohamed ismael,2026-04-29,21:13:15,21:13:17,0.00,Closed
+shada,2026-04-29,21:13:19,21:13:20,0.00,Closed
+mohamed ismael,2026-04-29,21:57:11,21:57:11,0.00,Closed
