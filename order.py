@@ -1,183 +1,238 @@
+import csv
+import os
 import tkinter as tk
 from tkinter import messagebox, ttk
-import csv, os, sys, subprocess
 
-# ── Theme ────────────────────────────────────────────────────────
-CREAM="#F3E9DC"; CARAMEL="#C08552"; BROWNIE="#5E3023"
-COFFEE="#895737"; WHITE="#FFFFFF"; LIGHT_BR="#D4A96A"; DANGER="#C0392B"
+from order_store import create_pending_order
+from ui_theme import (
+    BROWNIE, CARAMEL, COFFEE, CREAM, DANGER, LIGHT_BR, WHITE,
+    DATA_DIR, ensure_data_dir,
+    FONT_BODY,  FONT_SMALL,
+    build_footer, build_header, configure_root, go_back, make_button,
+)
 
-FT=("Georgia",13,"bold"); FB=("Georgia",10,"bold")
-FS=("Georgia",9);         FP=("Georgia",12,"bold"); FC=("Georgia",11)
+MENU_FILE = os.path.join(DATA_DIR, "menu.csv")
+CART_FILE = os.path.join(DATA_DIR, "cart.csv")
 
-BASE=os.path.dirname(os.path.abspath(__file__))
-MENU=os.path.join(BASE,"data","menu.csv")
-CART=os.path.join(BASE,"data","cart.csv")
+FONT_ITEM  = ("Georgia", 13, "bold")
+FONT_PRICE = ("Georgia", 12, "bold")
+FONT_CAT   = ("Georgia", 9)
 
-# ── Data ─────────────────────────────────────────────────────────
+MENU_FIELDS = ["item_name", "price", "quantity", "category"]
+
+
+def ensure_menu():
+    """Create menu.csv with headers only if it doesn't exist yet."""
+    if os.path.exists(MENU_FILE):
+        return
+    ensure_data_dir()
+    with open(MENU_FILE, "w", newline="", encoding="utf-8") as fh:
+        csv.DictWriter(fh, fieldnames=MENU_FIELDS).writeheader()
+
+
 def load_menu():
-    if not os.path.exists(MENU):
-        messagebox.showerror("Error",f"menu.csv not found!\n{MENU}"); return []
+    ensure_menu()
     try:
-        with open(MENU,newline="",encoding="utf-8") as f:
-            rows=list(csv.DictReader(f))
-        return [{"name":r["item_name"].strip(),"price":float(r.get("price",0)),
-                 "quantity":int(r.get("quantity",0)),"category":r.get("category","General").strip()}
-                for r in rows if r.get("item_name","").strip()]
-    except Exception as e:
-        messagebox.showerror("Error",str(e)); return []
+        with open(MENU_FILE, newline="", encoding="utf-8") as fh:
+            rows = list(csv.DictReader(fh))
+        return [
+            {
+                "name":     row["item_name"].strip(),
+                "price":    float(row.get("price", 0)),
+                "quantity": int(row.get("quantity", 0)),
+                "category": row.get("category", "General").strip(),
+            }
+            for row in rows if row.get("item_name", "").strip()
+        ]
+    except Exception as exc:
+        messagebox.showerror("Error", str(exc))
+        return []
+
 
 def write_cart(cart):
-    os.makedirs(os.path.dirname(CART),exist_ok=True)
-    with open(CART,"w",newline="",encoding="utf-8") as f:
-        w=csv.writer(f); w.writerow(["item_name","quantity","price"])
-        [w.writerow([n,d["qty"],d["price"]]) for n,d in cart.items()]
+    ensure_data_dir()
+    with open(CART_FILE, "w", newline="", encoding="utf-8") as fh:
+        writer = csv.writer(fh)
+        writer.writerow(["item_name", "quantity", "price"])
+        for name, data in cart.items():
+            writer.writerow([name, data["qty"], data["price"]])
 
-# ── App ──────────────────────────────────────────────────────────
+
 class OrderApp:
-    def __init__(self,root,dashboard_window=None):
-        self.root=root; self.dash=dashboard_window
-        self.root.title("☕ Corner Café — Order")
-        self.root.state("zoomed"); self.root.configure(bg=CREAM)
-        self.items=load_menu(); self.cart={}
-        self.sv=tk.StringVar(); self.sv.trace("w",lambda *_:self.render())
-        self.cv=tk.StringVar(value="All")
-        self._ui(); self.render()
+    def __init__(self, root, dashboard_window=None, username="Admin", role="admin", navigate=None):
+        self.root = root
+        self.dash = dashboard_window
+        self.username = username
+        self.role = role
+        self.navigate = navigate
+        self.items = load_menu()
+        self.cart = {}
+        self.sv = tk.StringVar()
+        self.sv.trace_add("write", lambda *_: self.render())
+        self.cv = tk.StringVar(value="All")
+        self.cv.trace_add("write", lambda *_: self.render())
 
-    def _btn(self,parent,text,bg,cmd,hover=None,**kw):
-        hbg=hover or LIGHT_BR
-        b=tk.Button(parent,text=text,bg=bg,fg=WHITE,font=FB,relief="flat",
-                    bd=0,cursor="hand2",command=cmd,
-                    activebackground=hbg,activeforeground=BROWNIE,**kw)
-        b.bind("<Enter>",lambda e,b=b,c=hbg:b.config(bg=c))
-        b.bind("<Leave>",lambda e,b=b,c=bg:b.config(bg=c))
-        return b
+        configure_root(self.root, "Corner Cafe - Order")
+        self._build_ui()
+        self.render()
 
-    def _ui(self):
-        # Header
-        tk.Frame(self.root,bg=BROWNIE,height=6).pack(fill="x")
-        h=tk.Frame(self.root,bg=BROWNIE,pady=12); h.pack(fill="x")
-        tk.Label(h,text="☕  CORNER CAFÉ — New Order",font=("Georgia",17,"bold"),
-                 bg=BROWNIE,fg=CREAM).pack(side="left",padx=20)
-        tk.Frame(self.root,bg=CARAMEL,height=3).pack(fill="x")
+    def _build_ui(self):
+        build_header(self.root, "CORNER CAFE - New Order")
 
-        # Toolbar
-        tb=tk.Frame(self.root,bg=COFFEE,pady=8); tb.pack(fill="x")
-        self._btn(tb,"⬅  Dashboard",BROWNIE,self._back,padx=14,pady=6).pack(side="left",padx=12)
-        sf=tk.Frame(tb,bg=WHITE,highlightthickness=1,highlightbackground=CARAMEL)
-        sf.pack(side="left",padx=16,ipadx=4,ipady=2)
-        tk.Label(sf,text="🔍",bg=WHITE,fg=COFFEE,font=FC).pack(side="left",padx=4)
-        tk.Entry(sf,textvariable=self.sv,bg=WHITE,fg=BROWNIE,relief="flat",
-                 font=FC,width=26,insertbackground=BROWNIE).pack(side="left",ipady=4,padx=(0,6))
-        cats=["All"]+sorted({i["category"] for i in self.items})
-        cb=ttk.Combobox(tb,textvariable=self.cv,values=cats,state="readonly",font=FS,width=14)
-        cb.pack(side="left",padx=4,ipady=3)
-        self.cv.trace("w",lambda *_:self.render())
-        self.badge=tk.Label(tb,text="",font=FS,bg=COFFEE,fg=CREAM)
-        self.badge.pack(side="right",padx=16)
+        toolbar = tk.Frame(self.root, bg=COFFEE, pady=8)
+        toolbar.pack(fill="x")
+        make_button(toolbar, "Dashboard", BROWNIE, self._back, padx=14, pady=6).pack(side="left", padx=12)
 
-        # Body
-        body=tk.Frame(self.root,bg=CREAM); body.pack(fill="both",expand=True)
+        search_frame = tk.Frame(toolbar, bg=WHITE, highlightthickness=1, highlightbackground=CARAMEL)
+        search_frame.pack(side="left", padx=16, ipadx=4, ipady=2)
+        tk.Label(search_frame, text="Search", bg=WHITE, fg=COFFEE, font=FONT_BODY).pack(side="left", padx=4)
+        tk.Entry(
+            search_frame, textvariable=self.sv, bg=WHITE, fg=BROWNIE,
+            relief="flat", font=FONT_BODY, width=26, insertbackground=BROWNIE,
+        ).pack(side="left", ipady=4, padx=(0, 6))
 
-        # LEFT – menu
-        left=tk.Frame(body,bg=CREAM); left.pack(side="left",fill="both",expand=True,padx=(12,4),pady=10)
-        tk.Label(left,text="Menu",font=("Georgia",16,"bold"),bg=CREAM,fg=BROWNIE).pack(anchor="w",pady=(0,6))
-        wrap=tk.Frame(left,bg=CREAM); wrap.pack(fill="both",expand=True)
-        self.canvas=tk.Canvas(wrap,bg=CREAM,highlightthickness=0)
-        vsb=tk.Scrollbar(wrap,orient="vertical",command=self.canvas.yview)
+        categories = ["All"] + sorted({item["category"] for item in self.items})
+        ttk.Combobox(toolbar, textvariable=self.cv, values=categories, state="readonly", font=FONT_SMALL, width=14).pack(side="left", padx=4, ipady=3)
+        self.badge = tk.Label(toolbar, text="", font=FONT_SMALL, bg=COFFEE, fg=CREAM)
+        self.badge.pack(side="right", padx=16)
+
+        body = tk.Frame(self.root, bg=CREAM)
+        body.pack(fill="both", expand=True)
+
+        left = tk.Frame(body, bg=CREAM)
+        left.pack(side="left", fill="both", expand=True, padx=(12, 4), pady=10)
+        tk.Label(left, text="Menu", font=("Georgia", 16, "bold"), bg=CREAM, fg=BROWNIE).pack(anchor="w", pady=(0, 6))
+
+        wrap = tk.Frame(left, bg=CREAM)
+        wrap.pack(fill="both", expand=True)
+        self.canvas = tk.Canvas(wrap, bg=CREAM, highlightthickness=0)
+        vsb = tk.Scrollbar(wrap, orient="vertical", command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=vsb.set)
-        vsb.pack(side="right",fill="y"); self.canvas.pack(side="left",fill="both",expand=True)
-        self.sf=tk.Frame(self.canvas,bg=CREAM)
-        self.cw=self.canvas.create_window((0,0),window=self.sf,anchor="nw")
-        self.sf.bind("<Configure>",lambda e:self.canvas.configure(scrollregion=self.canvas.bbox("all")))
-        self.canvas.bind("<Configure>",lambda e:self.canvas.itemconfig(self.cw,width=e.width))
-        self.canvas.bind_all("<MouseWheel>",lambda e:self.canvas.yview_scroll(int(-e.delta/120),"units"))
-        self.canvas.bind_all("<Button-4>",lambda e:self.canvas.yview_scroll(-1,"units"))
-        self.canvas.bind_all("<Button-5>",lambda e:self.canvas.yview_scroll(1,"units"))
+        vsb.pack(side="right", fill="y")
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.sf = tk.Frame(self.canvas, bg=CREAM)
+        self.cw = self.canvas.create_window((0, 0), window=self.sf, anchor="nw")
+        self.sf.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        self.canvas.bind("<Configure>", lambda e: self.canvas.itemconfig(self.cw, width=e.width))
+        self.canvas.bind_all("<MouseWheel>", lambda e: self.canvas.yview_scroll(int(-e.delta / 120), "units"))
+        self.canvas.bind_all("<Button-4>",   lambda e: self.canvas.yview_scroll(-1, "units"))
+        self.canvas.bind_all("<Button-5>",   lambda e: self.canvas.yview_scroll(1, "units"))
 
-        # RIGHT – cart
-        right=tk.Frame(body,bg=WHITE,highlightthickness=2,highlightbackground=CARAMEL)
-        right.pack(side="right",fill="y",padx=(4,12),pady=10,ipadx=4)
-        ch=tk.Frame(right,bg=BROWNIE,pady=10); ch.pack(fill="x")
-        tk.Label(ch,text="🛒  Your Cart",font=("Georgia",13,"bold"),bg=BROWNIE,fg=CREAM).pack()
-        lw=tk.Frame(right,bg=WHITE); lw.pack(fill="both",expand=True,padx=8,pady=8)
-        csb=tk.Scrollbar(lw,orient="vertical")
-        self.cl=tk.Listbox(lw,font=FC,bg=CREAM,fg=BROWNIE,selectbackground=CARAMEL,
-                           selectforeground=WHITE,relief="flat",bd=0,width=32,
-                           activestyle="none",yscrollcommand=csb.set)
-        csb.config(command=self.cl.yview); csb.pack(side="right",fill="y"); self.cl.pack(fill="both",expand=True)
-        tk.Frame(right,bg=CARAMEL,height=2).pack(fill="x",padx=8)
-        self.tot=tk.Label(right,text="Total:  0.00 EGP",font=("Georgia",13,"bold"),
-                          bg=WHITE,fg=BROWNIE,pady=8); self.tot.pack()
-        bf=tk.Frame(right,bg=WHITE); bf.pack(fill="x",padx=10,pady=(0,10))
-        self._btn(bf,"💾  Save & Send to Checkout",CARAMEL,self._save,pady=9).pack(fill="x",pady=(0,6))
-        self._btn(bf,"🗑  Clear Cart",BROWNIE,self._clear,hover=DANGER,pady=9).pack(fill="x")
+        right = tk.Frame(body, bg=WHITE, highlightthickness=2, highlightbackground=CARAMEL)
+        right.pack(side="right", fill="y", padx=(4, 12), pady=10, ipadx=4)
 
-        # Footer
-        ft=tk.Frame(self.root,bg=BROWNIE,pady=6); ft.pack(fill="x",side="bottom")
-        tk.Label(ft,text="© 2025 Corner Café System  |  All rights reserved",
-                 font=FS,bg=BROWNIE,fg=CARAMEL).pack()
+        cart_header = tk.Frame(right, bg=BROWNIE, pady=10)
+        cart_header.pack(fill="x")
+        tk.Label(cart_header, text="Your Cart", font=("Georgia", 13, "bold"), bg=BROWNIE, fg=CREAM).pack()
+
+        list_wrap = tk.Frame(right, bg=WHITE)
+        list_wrap.pack(fill="both", expand=True, padx=8, pady=8)
+        csb = tk.Scrollbar(list_wrap, orient="vertical")
+        self.cl = tk.Listbox(
+            list_wrap, font=FONT_BODY, bg=CREAM, fg=BROWNIE,
+            selectbackground=CARAMEL, selectforeground=WHITE,
+            relief="flat", bd=0, width=32, activestyle="none",
+            yscrollcommand=csb.set,
+        )
+        csb.config(command=self.cl.yview)
+        csb.pack(side="right", fill="y")
+        self.cl.pack(fill="both", expand=True)
+
+        tk.Frame(right, bg=CARAMEL, height=2).pack(fill="x", padx=8)
+        self.tot = tk.Label(right, text="Total:  0.00 EGP", font=("Georgia", 13, "bold"), bg=WHITE, fg=BROWNIE, pady=8)
+        self.tot.pack()
+
+        buttons = tk.Frame(right, bg=WHITE)
+        buttons.pack(fill="x", padx=10, pady=(0, 10))
+        make_button(buttons, "Save & Send to Checkout", CARAMEL, self._save, pady=9).pack(fill="x", pady=(0, 6))
+        make_button(buttons, "Clear Cart", BROWNIE, self._clear, hover=DANGER, pady=9).pack(fill="x")
+
+        build_footer(self.root)
 
     def render(self):
-        for w in self.sf.winfo_children(): w.destroy()
-        q=self.sv.get().lower(); cat=self.cv.get()
-        data=[i for i in self.items if q in i["name"].lower() and (cat=="All" or i["category"]==cat)]
+        for widget in self.sf.winfo_children():
+            widget.destroy()
+        query    = self.sv.get().lower()
+        category = self.cv.get()
+        data = [
+            item for item in self.items
+            if query in item["name"].lower() and (category == "All" or item["category"] == category)
+        ]
         self.badge.config(text=f"  {len(data)} item(s)  ")
         if not data:
-            tk.Label(self.sf,text="No items found.",font=FC,bg=CREAM,fg=COFFEE,pady=30).pack(); return
+            tk.Label(self.sf, text="No items found.", font=FONT_BODY, bg=CREAM, fg=COFFEE, pady=30).pack()
+            return
+
         for item in data:
-            ok=item["quantity"]>0
-            card=tk.Frame(self.sf,bg=WHITE,highlightthickness=1,highlightbackground=CARAMEL,padx=18,pady=14)
-            card.pack(fill="x",padx=12,pady=6)
-            tr=tk.Frame(card,bg=WHITE); tr.pack(fill="x")
-            tk.Label(tr,text=item["name"],font=FT,bg=WHITE,fg=BROWNIE).pack(side="left")
-            tk.Label(tr,text=f"  {item['category']}  ",font=FS,bg=CARAMEL,fg=WHITE,padx=4,pady=2).pack(side="right")
-            ir=tk.Frame(card,bg=WHITE); ir.pack(fill="x",pady=(4,8))
-            tk.Label(ir,text=f"{item['price']:.2f} EGP",font=FP,bg=WHITE,fg=COFFEE).pack(side="left")
-            sc="#4CAF50" if item["quantity"]>10 else (DANGER if item["quantity"]==0 else "#E8A020")
-            tk.Label(ir,text=f"  Stock: {item['quantity']}",font=FS,bg=WHITE,fg=sc).pack(side="left",padx=10)
-            br=tk.Frame(card,bg=WHITE); br.pack(anchor="w")
-            self._btn(br,"➕  Add",CARAMEL if ok else "#CCC",lambda i=item:self._add(i),
-                      padx=18,pady=6,state="normal" if ok else "disabled").pack(side="left",padx=(0,8))
-            self._btn(br,"➖  Remove",BROWNIE,lambda i=item:self._rem(i),
-                      hover=DANGER,padx=18,pady=6).pack(side="left")
+            ok   = item["quantity"] > 0
+            card = tk.Frame(self.sf, bg=WHITE, highlightthickness=1, highlightbackground=CARAMEL, padx=18, pady=14)
+            card.pack(fill="x", padx=12, pady=6)
+
+            top = tk.Frame(card, bg=WHITE)
+            top.pack(fill="x")
+            tk.Label(top, text=item["name"], font=FONT_ITEM, bg=WHITE, fg=BROWNIE).pack(side="left")
+            tk.Label(top, text=f"  {item['category']}  ", font=FONT_CAT, bg=CARAMEL, fg=WHITE, padx=4, pady=2).pack(side="right")
+
+            info = tk.Frame(card, bg=WHITE)
+            info.pack(fill="x", pady=(4, 8))
+            tk.Label(info, text=f"{item['price']:.2f} EGP", font=FONT_PRICE, bg=WHITE, fg=COFFEE).pack(side="left")
+            
+            stock_color = COFFEE if ok else DANGER
+            tk.Label(info, text=f"  Stock: {item['quantity']}", font=FONT_CAT, bg=WHITE, fg=stock_color).pack(side="left", padx=10)
+
+            actions = tk.Frame(card, bg=WHITE)
+            actions.pack(anchor="w")
+            
+            btn_state = "normal" if ok else "disabled"
+            bg_color = CARAMEL if ok else LIGHT_BR
+            make_button(actions, "Add to Cart", bg_color, lambda i=item: self._add(i), state=btn_state, padx=18, pady=6).pack(side="left", padx=(0, 8))
+            make_button(actions, "Remove", BROWNIE, lambda i=item: self._rem(i), hover=DANGER, padx=18, pady=6).pack(side="left")
+
         self.canvas.yview_moveto(0)
 
-    def _add(self,item):
-        n=item["name"]
-        self.cart[n]=self.cart.get(n,{"qty":0,"price":item["price"]})
-        self.cart[n]["qty"]+=1; self._refresh_cart()
+    def _add(self, item):
+        name = item["name"]
+        self.cart.setdefault(name, {"qty": 0, "price": item["price"]})
+        self.cart[name]["qty"] += 1
+        self._refresh_cart()
 
-    def _rem(self,item):
-        n=item["name"]
-        if n in self.cart:
-            self.cart[n]["qty"]-=1
-            if self.cart[n]["qty"]<=0: del self.cart[n]
+    def _rem(self, item):
+        name = item["name"]
+        if name in self.cart:
+            self.cart[name]["qty"] -= 1
+            if self.cart[name]["qty"] <= 0:
+                del self.cart[name]
         self._refresh_cart()
 
     def _refresh_cart(self):
-        self.cl.delete(0,tk.END); total=0
-        for n,d in self.cart.items():
-            lt=d["qty"]*d["price"]; total+=lt
-            self.cl.insert(tk.END,f"  {n}  ×{d['qty']}  =  {lt:.2f} EGP")
+        self.cl.delete(0, tk.END)
+        total = 0
+        for name, data in self.cart.items():
+            line_total = data["qty"] * data["price"]
+            total += line_total
+            self.cl.insert(tk.END, f"  {name}  x{data['qty']}  =  {line_total:.2f} EGP")
         self.tot.config(text=f"Total:  {total:.2f} EGP")
 
     def _clear(self):
-        if self.cart and messagebox.askyesno("Clear","Remove all items?"):
-            self.cart.clear(); self._refresh_cart()
+        if self.cart and messagebox.askyesno("Clear", "Remove all items?"):
+            self.cart.clear()
+            self._refresh_cart()
 
     def _save(self):
         if not self.cart:
-            messagebox.showwarning("Empty","Add at least one item first."); return
+            messagebox.showwarning("Empty", "Add at least one item first.")
+            return
         write_cart(self.cart)
-        messagebox.showinfo("Saved ✓","Cart saved! Open Checkout to process payment.")
+        order = create_pending_order(self.cart)
+        self.cart.clear()
+        self._refresh_cart()
+        messagebox.showinfo("Saved", f"Order saved as {order['order_id']}.\nYou can add another order or open Checkout.")
 
     def _back(self):
-        self.root.destroy()
-        if self.dash:
-            try: self.dash.deiconify(); self.dash.state("zoomed"); return
-            except: pass
-        dash=os.path.join(BASE,"dashboard.py")
-        if os.path.exists(dash): subprocess.Popen([sys.executable,dash])
+        go_back(self.navigate, self.username, self.role, self.root, self.dash)
 
-if __name__=="__main__":
-    root=tk.Tk(); OrderApp(root); root.mainloop()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = OrderApp(root)
+    root.mainloop()
