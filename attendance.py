@@ -29,7 +29,7 @@ def load_attendance():
     with open(ATTENDANCE_FILE, newline="", encoding="utf-8") as fh:
         return list(csv.DictReader(fh))
 
-
+#save_attendance
 def save_attendance(rows):
     ensure_attendance_file()
     with open(ATTENDANCE_FILE, "w", newline="", encoding="utf-8") as fh:
@@ -37,7 +37,7 @@ def save_attendance(rows):
         writer.writeheader()
         writer.writerows(rows)
 
-
+#calculate_hours
 def calculate_hours(date_text, clock_in_text, clock_out_text):
     fmt = "%Y-%m-%d %H:%M:%S"
     clock_in  = datetime.strptime(f"{date_text} {clock_in_text}",  fmt)
