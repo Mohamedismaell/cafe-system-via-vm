@@ -1,3 +1,8 @@
+# Configuration file defining all available modules in the cafe management system.
+# Each module includes metadata such as display label, icon, role-based access controls,
+# and whether it appears in the dashboard. This centralized configuration makes it easy
+# to manage which features are available to different user roles.
+
 MODULES = {
     "login": {
         "label": "Login",
